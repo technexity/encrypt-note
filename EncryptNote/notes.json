@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Finance",
+    "filepath": "finance-notes.txt",
+    "locked": true
+  },
+  {
+    "id": 2,
+    "name": "Password",
+    "filepath": "password-notes.txt",
+    "locked": true
+  },
+  {
+    "id": 3,
+    "name": "Credit Card",
+    "filepath": "credit-card-notes.txt",
+    "locked": true
+  },
+  {
+    "id": 4,
+    "name": "Transaction",
+    "filepath": "transaction-notes.txt",
+    "locked": true
+  },
+  {
+    "id": 5,
+    "name": "Other notes",
+    "filepath": "other-notes.txt",
+    "locked": true
+  }
+]
