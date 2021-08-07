@@ -71,6 +71,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     [[Settings settings] idAuthenicateWithCompletionHandler:^(BOOL success, NSString * _Nonnull errorMsg) {
+        
         if (success) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 /// User authenticated successfully, take appropriate action
@@ -79,6 +80,13 @@
                 NoteEditorViewController *viewController = [[NoteEditorViewController alloc] init];
                 viewController.note = note;
                 [self.navigationController pushViewController:viewController animated:YES];
+                
+            });
+        }
+        else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                [[Settings settings] showAlertIn:self title:@"Error" message:errorMsg];
                 
             });
         }

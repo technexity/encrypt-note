@@ -70,25 +70,41 @@
 		E61FC63026BE3B1600C8C8B4 /* EncryptNote */ = {
 			isa = PBXGroup;
 			children = (
+				E61FC65826BE8F9300C8C8B4 /* Classes */,
+				E61FC65A26BE907100C8C8B4 /* Supporting Files */,
+			);
+			path = EncryptNote;
+			sourceTree = "<group>";
+		};
+		E61FC65826BE8F9300C8C8B4 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
 				E61FC63126BE3B1600C8C8B4 /* AppDelegate.h */,
 				E61FC63226BE3B1600C8C8B4 /* AppDelegate.m */,
 				E61FC63426BE3B1600C8C8B4 /* SceneDelegate.h */,
 				E61FC63526BE3B1600C8C8B4 /* SceneDelegate.m */,
+				E61FC64A26BE3C0A00C8C8B4 /* MainViewController.h */,
+				E61FC64B26BE3C0A00C8C8B4 /* MainViewController.m */,
+				E61FC65226BE515800C8C8B4 /* NoteEditorViewController.h */,
+				E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */,
+				E61FC64D26BE3ED300C8C8B4 /* Note.h */,
+				E61FC64E26BE3ED300C8C8B4 /* Note.m */,
+				E61FC65526BE7D7F00C8C8B4 /* Settings.h */,
+				E61FC65626BE7D7F00C8C8B4 /* Settings.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		E61FC65A26BE907100C8C8B4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
 				E61FC63D26BE3B1900C8C8B4 /* Assets.xcassets */,
 				E61FC63F26BE3B1900C8C8B4 /* LaunchScreen.storyboard */,
 				E61FC64226BE3B1900C8C8B4 /* Info.plist */,
 				E61FC64326BE3B1900C8C8B4 /* main.m */,
-				E61FC64A26BE3C0A00C8C8B4 /* MainViewController.h */,
-				E61FC64B26BE3C0A00C8C8B4 /* MainViewController.m */,
-				E61FC64D26BE3ED300C8C8B4 /* Note.h */,
-				E61FC64E26BE3ED300C8C8B4 /* Note.m */,
 				E61FC65026BE402E00C8C8B4 /* notes.json */,
-				E61FC65226BE515800C8C8B4 /* NoteEditorViewController.h */,
-				E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */,
-				E61FC65526BE7D7F00C8C8B4 /* Settings.h */,
-				E61FC65626BE7D7F00C8C8B4 /* Settings.m */,
 			);
-			path = EncryptNote;
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
