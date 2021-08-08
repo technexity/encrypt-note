@@ -6,7 +6,9 @@
 //
 
 #import "NoteEditorViewController.h"
-#import "CloudKitDatabase.h"
+#import "Note.h"
+#import "NoteDocument.h"
+#import "MasterNoteViewController.h"
 
 #define NUMBER_OF_SECTIONS 3
 #define SECTION_NAME 0
@@ -48,53 +50,47 @@
     
     self.navigationItem.leftBarButtonItem = cancelButton;
     self.navigationItem.rightBarButtonItem = doneButton;
+    
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
+    [self.view addGestureRecognizer:tapRecognizer];
 }
-
 
 #pragma mark - UITableViewDataSource
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return NUMBER_OF_SECTIONS;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return 1;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (indexPath.section == SECTION_CONTENT)
-    {
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == SECTION_CONTENT) {
         return 240.f;
     }
     return 49.f;//UITableViewAutomaticDimension;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString* CellIdentifier = @"DetailCell";
     
     UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    if (cell == nil)
-    {
+    if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         
         cell.userInteractionEnabled = YES;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.accessoryType = UITableViewCellAccessoryNone;
         
-        if (indexPath.section == SECTION_NAME)
-        {
-            if (indexPath.row == 0)
-            {
+        if (indexPath.section == SECTION_NAME) {
+            if (indexPath.row == 0) {
                 self.nameTextField = [[UITextField alloc] initWithFrame:CGRectZero];
                 self.nameTextField.adjustsFontSizeToFitWidth = YES;
                 self.nameTextField.backgroundColor = [UIColor whiteColor];
                 self.nameTextField.autocorrectionType = UITextAutocorrectionTypeNo; // no auto correction support
-                self.nameTextField.autocapitalizationType = UITextAutocapitalizationTypeNone; // no auto capitalization support
+                self.nameTextField.autocapitalizationType = UITextAutocapitalizationTypeWords; // no auto capitalization support
                 self.nameTextField.textAlignment = NSTextAlignmentLeft;
                 self.nameTextField.font = [UIFont systemFontOfSize:20];
                 self.nameTextField.tag = NAME_CONTROL_TAG;
@@ -115,13 +111,12 @@
             }
         }
         
-        if (indexPath.section == SECTION_CONTENT)
-        {
+        if (indexPath.section == SECTION_CONTENT) {
             self.contentTextView = [[UITextView alloc] initWithFrame:CGRectZero];
             
             self.contentTextView.backgroundColor = [UIColor whiteColor];
             self.contentTextView.autocorrectionType = UITextAutocorrectionTypeNo; // no auto correction support
-            self.contentTextView.autocapitalizationType = UITextAutocapitalizationTypeNone; // no auto capitalization support
+            self.contentTextView.autocapitalizationType = UITextAutocapitalizationTypeSentences; // no auto capitalization support
             self.contentTextView.textAlignment = NSTextAlignmentLeft;
             self.contentTextView.font = [UIFont systemFontOfSize:20];
             self.contentTextView.tag = CONTENT_CONTROL_TAG;
@@ -140,10 +135,8 @@
             self.contentTextView.delegate = self;
         }
         
-        if (indexPath.section == SECTION_LOCKED)
-        {
-            if (indexPath.row == 0)
-            {
+        if (indexPath.section == SECTION_LOCKED) {
+            if (indexPath.row == 0) {
                 cell.textLabel.font = [UIFont systemFontOfSize:20];
                 
                 self.lockedSwitch = [[UISwitch alloc] initWithFrame:CGRectZero];
@@ -159,30 +152,30 @@
         }
     }
     
-    if (indexPath.section == SECTION_NAME)
-    {
-        if (indexPath.row == 0)
-        {
-            self.nameTextField.text = self.note.name;
+    if (indexPath.section == SECTION_NAME) {
+        if (indexPath.row == 0) {
+            if (self.note != nil) {
+                self.nameTextField.text = self.note.noteName;
+            }
             [self.nameTextField becomeFirstResponder];
         }
     }
     
-    if (indexPath.section == SECTION_CONTENT)
-    {
-        if (indexPath.row == 0)
-        {
-            self.contentTextView.text = self.note.name;
-            [self.contentTextView becomeFirstResponder];
+    if (indexPath.section == SECTION_CONTENT) {
+        if (indexPath.row == 0) {
+            if (self.note != nil) {
+                self.contentTextView.text = self.note.noteName;
+            }
+            //[self.contentTextView becomeFirstResponder];
         }
     }
     
-    if (indexPath.section == SECTION_LOCKED)
-    {
-        if (indexPath.row == 0)
-        {
+    if (indexPath.section == SECTION_LOCKED) {
+        if (indexPath.row == 0) {
             cell.textLabel.text = NSLocalizedString(@"Locked", nil);
-            self.lockedSwitch.on = self.note.locked;
+            if (self.note != nil) {
+                self.lockedSwitch.on = self.note.requireUnlocked;
+            }
         }
     }
     
@@ -191,64 +184,66 @@
 
 #pragma mark - UITextFieldDelegate
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField
-{
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
     [textField becomeFirstResponder];
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
-{
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [textField resignFirstResponder];
     return YES;
 }
 
 #pragma mark - UITextViewDelegate
 
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-    [textView becomeFirstResponder];
+- (void)textViewDidBeginEditing:(UITextView *)textView {
+    //[textView becomeFirstResponder];
 }
 
-- (BOOL)textViewShouldEndEditing:(UITextView *)textView
-{
+- (BOOL)textViewShouldEndEditing:(UITextView *)textView {
     [textView resignFirstResponder];
     return YES;
 }
 
+#pragma mark -
+
+- (void)tapAction:(UITapGestureRecognizer *)sender {
+    [[self view] endEditing: YES];
+}
+
 #pragma mark - Actions
 
-- (void)cancelAction:(id)sender
-{
-    [self.navigationController popViewControllerAnimated:YES];
+- (void)cancelAction:(id)sender {
+    if (self.note != nil) {
+        [self.navigationController popViewControllerAnimated:YES];
+    } else {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
-- (void)doneAction:(id)sender
-{
-    if ([self.nameTextField.text length] > 0)
-    {
+- (void)doneAction:(id)sender {
+    if ([self.nameTextField.text length] > 0) {
         
     }
     
-    if (self.lockedSwitch.on)
-    {
+    if (self.lockedSwitch.on) {
         
     }
     
-    NSString *content = self.contentTextView.text;
+    Note *note = [[Note alloc] initWithNoteName:self.nameTextField.text noteText:self.contentTextView.text requireUnlocked:self.lockedSwitch.on];
+    [self.viewController saveNote:note];
     
-    [[CloudKitDatabase sharedDB] updateRecordWithName:self.note.name content:content];
-    
-    [self.navigationController popViewControllerAnimated:YES];
+    if (self.note != nil) {
+        [self.navigationController popViewControllerAnimated:YES];
+    } else {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
-- (void)switchAction:(id)sender
-{
-    if ([sender isKindOfClass:[UISwitch class]])
-    {
+- (void)switchAction:(id)sender {
+    if ([sender isKindOfClass:[UISwitch class]]) {
         UISwitch *senderSwitch = (UISwitch *)sender;
         
-        if (senderSwitch.tag == LOCKED_CONTROL_TAG)
-        {
+        if (senderSwitch.tag == LOCKED_CONTROL_TAG) {
             NSLog(@"On/off: %@", [senderSwitch isOn] ? @"YES" : @"NO");
         }
     }
