@@ -6,6 +6,7 @@
 //
 
 #import "NoteEditorViewController.h"
+#import "CloudKitDatabase.h"
 
 #define NUMBER_OF_SECTIONS 3
 #define SECTION_NAME 0
@@ -232,6 +233,10 @@
     {
         
     }
+    
+    NSString *content = self.contentTextView.text;
+    
+    [[CloudKitDatabase sharedDB] updateRecordWithName:self.note.name content:content];
     
     [self.navigationController popViewControllerAnimated:YES];
 }
