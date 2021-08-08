@@ -24,6 +24,7 @@
 		E674BF3226BF881000770307 /* MasterSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3126BF881000770307 /* MasterSettingsViewController.m */; };
 		E674BF3626BF918700770307 /* Bookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3526BF918700770307 /* Bookmark.m */; };
 		E674BF3926BF91A500770307 /* BookmarkStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3826BF91A400770307 /* BookmarkStorage.m */; };
+		E674BF3C26BFE1A800770307 /* NoteDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3B26BFE1A800770307 /* NoteDocument.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,8 @@
 		E674BF3526BF918700770307 /* Bookmark.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Bookmark.m; sourceTree = "<group>"; };
 		E674BF3726BF91A400770307 /* BookmarkStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BookmarkStorage.h; sourceTree = "<group>"; };
 		E674BF3826BF91A400770307 /* BookmarkStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BookmarkStorage.m; sourceTree = "<group>"; };
+		E674BF3A26BFE1A800770307 /* NoteDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoteDocument.h; sourceTree = "<group>"; };
+		E674BF3B26BFE1A800770307 /* NoteDocument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NoteDocument.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +120,8 @@
 				E674BF3526BF918700770307 /* Bookmark.m */,
 				E674BF3726BF91A400770307 /* BookmarkStorage.h */,
 				E674BF3826BF91A400770307 /* BookmarkStorage.m */,
+				E674BF3A26BFE1A800770307 /* NoteDocument.h */,
+				E674BF3B26BFE1A800770307 /* NoteDocument.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -228,6 +233,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E674BF3C26BFE1A800770307 /* NoteDocument.m in Sources */,
 				E61FC64F26BE3ED300C8C8B4 /* Note.m in Sources */,
 				E674BEEE26BEAF4300770307 /* CloudKitDatabase.m in Sources */,
 				E674BF3926BF91A500770307 /* BookmarkStorage.m in Sources */,

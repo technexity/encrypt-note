@@ -39,11 +39,9 @@ static NSString * const kBookmarkedDate     = @"bookmarkedDate";
     return self;
 }
 
-- (instancetype)initWithCoder:(NSCoder *)aDecoder
-{
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super init];
-    if (self != nil)
-    {
+    if (self != nil) {
         self.bookmarkId = [aDecoder decodeIntegerForKey:kBookmarkId];
         self.bookmarkName =[aDecoder decodeObjectForKey:kBookmarkName];
         self.noteUniqueKey =[aDecoder decodeObjectForKey:kNoteUniqueKey];
@@ -53,8 +51,7 @@ static NSString * const kBookmarkedDate     = @"bookmarkedDate";
     return self;
 }
 
-- (void)encodeWithCoder:(NSCoder *)aCoder;
-{
+- (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeInteger:self.bookmarkId forKey:kBookmarkId];
     [aCoder encodeObject:self.bookmarkName forKey:kBookmarkName];
     [aCoder encodeObject:self.noteUniqueKey forKey:kNoteUniqueKey];
@@ -62,8 +59,7 @@ static NSString * const kBookmarkedDate     = @"bookmarkedDate";
     [aCoder encodeObject:self.bookmarkedDate forKey:kBookmarkedDate];
 }
 
-+ (BOOL)supportsSecureCoding
-{
++ (BOOL)supportsSecureCoding {
     return YES;
 }
 
