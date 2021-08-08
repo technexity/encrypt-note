@@ -1,5 +1,5 @@
 //
-//  MainViewController.h
+//  MasterNoteViewController.h
 //  EncryptNote
 //
 //  Created by Nam Tran on 07/08/2021.
@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MainViewController : UIViewController
+@interface MasterNoteViewController : UIViewController
 
 @end
 
