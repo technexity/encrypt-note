@@ -245,7 +245,7 @@
 {
     if ([sender isKindOfClass:[UISwitch class]])
     {
-        UISwitch* senderSwitch = (UISwitch*)sender;
+        UISwitch *senderSwitch = (UISwitch *)sender;
         
         if (senderSwitch.tag == LOCKED_CONTROL_TAG)
         {

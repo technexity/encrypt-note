@@ -8,6 +8,10 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 #import "Settings.h"
 
+NSString * const kBookmarkBundle = @"Bookmarks";
+NSString * const kBookmarksInOrder = @"BookmarksInOrder";
+NSString * const kBookmarksInAscOrder = @"BookmarksInAscOrder";
+
 @interface Settings ()
 
 @property (nonatomic, strong) NSUserDefaults * defaults;

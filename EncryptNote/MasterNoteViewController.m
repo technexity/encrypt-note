@@ -1,26 +1,30 @@
 //
-//  MainViewController.m
+//  MasterNoteViewController.m
 //  EncryptNote
 //
 //  Created by Nam Tran on 07/08/2021.
 //
 
-#import "MainViewController.h"
+#import "MasterNoteViewController.h"
 #import "NoteEditorViewController.h"
 #import "Note.h"
 #import "Settings.h"
+#import "BookmarkStorage.h"
 
-@interface MainViewController () <UITableViewDataSource, UITableViewDelegate>
+@interface MasterNoteViewController () <UITableViewDataSource, UITableViewDelegate>
 
-@property (nonatomic, strong) UITableView * tableView;
 @property (nonatomic, strong) NSArray * data;
+@property (nonatomic, strong) UITableView * tableView;
+@property (nonatomic, strong) UISwitch   * bookmarkedSwitch;
 
 @end
 
-@implementation MainViewController
+@implementation MasterNoteViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.extendedLayoutIncludesOpaqueBars = YES;
     
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     self.tableView.autoresizesSubviews = YES;
@@ -45,8 +49,7 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    if (cell == nil)
-    {
+    if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
         
         // enable user to interact with this cell
@@ -54,7 +57,16 @@
         cell.textLabel.font = [UIFont systemFontOfSize:20];
         cell.detailTextLabel.font = [UIFont systemFontOfSize:14];
         //cell.detailTextLabel.numberOfLines = 2;
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        
+        self.bookmarkedSwitch = [[UISwitch alloc] initWithFrame:CGRectZero];
+        
+        [self.bookmarkedSwitch addTarget:self action:@selector(switchAction:) forControlEvents:UIControlEventValueChanged];
+        
+        // in case the parent view draws with a custom color or gradient, use a transparent color
+        self.bookmarkedSwitch.backgroundColor = [UIColor clearColor];
+        
+        cell.accessoryView = self.bookmarkedSwitch;
+        //cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.selectionStyle = UITableViewCellSelectionStyleDefault;
     }
     
@@ -62,6 +74,12 @@
     cell.selectionStyle = UITableViewCellSelectionStyleDefault;
     cell.textLabel.text = note.name;
     cell.detailTextLabel.text = note.filePath;
+    
+    Bookmark *bookmark = [[BookmarkStorage sharedStorage] findBookmarkWithName:note.name];
+    self.bookmarkedSwitch.on = bookmark != nil;
+    
+    // use switch tag to keep the table row number
+    self.bookmarkedSwitch.tag = indexPath.row;
     
     return cell;
 }
@@ -94,6 +112,22 @@
     }];
     
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+}
+
+#pragma mark - Switch Action
+
+- (void)switchAction:(id)sender {
+    if ([sender isKindOfClass:[UISwitch class]]) {
+        UISwitch *senderSwitch = (UISwitch *)sender;
+        // use switch tag as index row number
+        Note *note = [self.data objectAtIndex:senderSwitch.tag];
+        if ([senderSwitch isOn]) {
+            Bookmark *bookmark = [[Bookmark alloc] initWithBookmarkName:note.name noteUniqueKey:note.name requireUnlocked:note.locked];
+            [[BookmarkStorage sharedStorage] saveBookmark:bookmark];
+        } else {
+            [[BookmarkStorage sharedStorage] removeBookmarkWithName:note.name];
+        }
+    }
 }
 
 #pragma mark - private implementation

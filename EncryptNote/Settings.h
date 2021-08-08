@@ -11,6 +11,10 @@
 #define ALERT_ACTION_CANCEL 100
 #define ALERT_ACTION_OTHER  101
 
+extern NSString * const kBookmarkBundle;
+extern NSString * const kBookmarksInOrder;
+extern NSString * const kBookmarksInAscOrder;
+
 typedef void (^UIAlertCompletionBlock) (UIAlertController* alertController, NSInteger buttonIndex);
 
 @interface Settings : NSObject

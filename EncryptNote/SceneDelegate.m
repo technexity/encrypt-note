@@ -6,7 +6,7 @@
 //
 
 #import "SceneDelegate.h"
-#import "MainViewController.h"
+#import "RootTabBarController.h"
 
 @interface SceneDelegate ()
 
@@ -22,12 +22,8 @@
     // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
     // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
     
-    MainViewController * viewController = [[MainViewController alloc] init];
-    viewController.view.backgroundColor = [UIColor redColor];
-    viewController.title = @"My Notes";
-    
-    self.rootViewController = [[UINavigationController alloc] initWithRootViewController:viewController];
-    
+    self.rootViewController = [[RootTabBarController alloc] init];
+
     self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
     self.window.rootViewController = self.rootViewController;
     self.window.backgroundColor = [UIColor redColor];

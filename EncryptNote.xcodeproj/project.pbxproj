@@ -12,13 +12,18 @@
 		E61FC63E26BE3B1900C8C8B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E61FC63D26BE3B1900C8C8B4 /* Assets.xcassets */; };
 		E61FC64126BE3B1900C8C8B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E61FC63F26BE3B1900C8C8B4 /* LaunchScreen.storyboard */; };
 		E61FC64426BE3B1900C8C8B4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64326BE3B1900C8C8B4 /* main.m */; };
-		E61FC64C26BE3C0A00C8C8B4 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64B26BE3C0A00C8C8B4 /* MainViewController.m */; };
+		E61FC64C26BE3C0A00C8C8B4 /* MasterNoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64B26BE3C0A00C8C8B4 /* MasterNoteViewController.m */; };
 		E61FC64F26BE3ED300C8C8B4 /* Note.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64E26BE3ED300C8C8B4 /* Note.m */; };
 		E61FC65126BE402E00C8C8B4 /* notes.json in Resources */ = {isa = PBXBuildFile; fileRef = E61FC65026BE402E00C8C8B4 /* notes.json */; };
 		E61FC65426BE515800C8C8B4 /* NoteEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */; };
 		E61FC65726BE7D7F00C8C8B4 /* Settings.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC65626BE7D7F00C8C8B4 /* Settings.m */; };
 		E61FC65E26BE9A0800C8C8B4 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E61FC65D26BE9A0800C8C8B4 /* CloudKit.framework */; };
 		E674BEEE26BEAF4300770307 /* CloudKitDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BEED26BEAF4300770307 /* CloudKitDatabase.m */; };
+		E674BF2C26BF868D00770307 /* RootTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF2B26BF868D00770307 /* RootTabBarController.m */; };
+		E674BF2F26BF872C00770307 /* MasterBookmarkViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF2E26BF872C00770307 /* MasterBookmarkViewController.m */; };
+		E674BF3226BF881000770307 /* MasterSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3126BF881000770307 /* MasterSettingsViewController.m */; };
+		E674BF3626BF918700770307 /* Bookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3526BF918700770307 /* Bookmark.m */; };
+		E674BF3926BF91A500770307 /* BookmarkStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3826BF91A400770307 /* BookmarkStorage.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,8 +36,8 @@
 		E61FC64026BE3B1900C8C8B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E61FC64226BE3B1900C8C8B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E61FC64326BE3B1900C8C8B4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		E61FC64A26BE3C0A00C8C8B4 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
-		E61FC64B26BE3C0A00C8C8B4 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
+		E61FC64A26BE3C0A00C8C8B4 /* MasterNoteViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MasterNoteViewController.h; sourceTree = "<group>"; };
+		E61FC64B26BE3C0A00C8C8B4 /* MasterNoteViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterNoteViewController.m; sourceTree = "<group>"; };
 		E61FC64D26BE3ED300C8C8B4 /* Note.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
 		E61FC64E26BE3ED300C8C8B4 /* Note.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Note.m; sourceTree = "<group>"; };
 		E61FC65026BE402E00C8C8B4 /* notes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = notes.json; sourceTree = "<group>"; };
@@ -44,6 +49,16 @@
 		E61FC65D26BE9A0800C8C8B4 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		E674BEEC26BEAF4300770307 /* CloudKitDatabase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CloudKitDatabase.h; sourceTree = "<group>"; };
 		E674BEED26BEAF4300770307 /* CloudKitDatabase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CloudKitDatabase.m; sourceTree = "<group>"; };
+		E674BF2A26BF868D00770307 /* RootTabBarController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RootTabBarController.h; sourceTree = "<group>"; };
+		E674BF2B26BF868D00770307 /* RootTabBarController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RootTabBarController.m; sourceTree = "<group>"; };
+		E674BF2D26BF872C00770307 /* MasterBookmarkViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MasterBookmarkViewController.h; sourceTree = "<group>"; };
+		E674BF2E26BF872C00770307 /* MasterBookmarkViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterBookmarkViewController.m; sourceTree = "<group>"; };
+		E674BF3026BF881000770307 /* MasterSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MasterSettingsViewController.h; sourceTree = "<group>"; };
+		E674BF3126BF881000770307 /* MasterSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterSettingsViewController.m; sourceTree = "<group>"; };
+		E674BF3426BF918700770307 /* Bookmark.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Bookmark.h; sourceTree = "<group>"; };
+		E674BF3526BF918700770307 /* Bookmark.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Bookmark.m; sourceTree = "<group>"; };
+		E674BF3726BF91A400770307 /* BookmarkStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BookmarkStorage.h; sourceTree = "<group>"; };
+		E674BF3826BF91A400770307 /* BookmarkStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BookmarkStorage.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,20 +102,21 @@
 		E61FC65826BE8F9300C8C8B4 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				E674BF3326BF8CE300770307 /* UI */,
 				E61FC63126BE3B1600C8C8B4 /* AppDelegate.h */,
 				E61FC63226BE3B1600C8C8B4 /* AppDelegate.m */,
 				E61FC63426BE3B1600C8C8B4 /* SceneDelegate.h */,
 				E61FC63526BE3B1600C8C8B4 /* SceneDelegate.m */,
-				E61FC64A26BE3C0A00C8C8B4 /* MainViewController.h */,
-				E61FC64B26BE3C0A00C8C8B4 /* MainViewController.m */,
-				E61FC65226BE515800C8C8B4 /* NoteEditorViewController.h */,
-				E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */,
 				E61FC64D26BE3ED300C8C8B4 /* Note.h */,
 				E61FC64E26BE3ED300C8C8B4 /* Note.m */,
 				E61FC65526BE7D7F00C8C8B4 /* Settings.h */,
 				E61FC65626BE7D7F00C8C8B4 /* Settings.m */,
 				E674BEEC26BEAF4300770307 /* CloudKitDatabase.h */,
 				E674BEED26BEAF4300770307 /* CloudKitDatabase.m */,
+				E674BF3426BF918700770307 /* Bookmark.h */,
+				E674BF3526BF918700770307 /* Bookmark.m */,
+				E674BF3726BF91A400770307 /* BookmarkStorage.h */,
+				E674BF3826BF91A400770307 /* BookmarkStorage.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -124,6 +140,23 @@
 				E61FC65D26BE9A0800C8C8B4 /* CloudKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E674BF3326BF8CE300770307 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				E674BF2A26BF868D00770307 /* RootTabBarController.h */,
+				E674BF2B26BF868D00770307 /* RootTabBarController.m */,
+				E61FC64A26BE3C0A00C8C8B4 /* MasterNoteViewController.h */,
+				E61FC64B26BE3C0A00C8C8B4 /* MasterNoteViewController.m */,
+				E61FC65226BE515800C8C8B4 /* NoteEditorViewController.h */,
+				E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */,
+				E674BF2D26BF872C00770307 /* MasterBookmarkViewController.h */,
+				E674BF2E26BF872C00770307 /* MasterBookmarkViewController.m */,
+				E674BF3026BF881000770307 /* MasterSettingsViewController.h */,
+				E674BF3126BF881000770307 /* MasterSettingsViewController.m */,
+			);
+			name = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -197,9 +230,14 @@
 			files = (
 				E61FC64F26BE3ED300C8C8B4 /* Note.m in Sources */,
 				E674BEEE26BEAF4300770307 /* CloudKitDatabase.m in Sources */,
+				E674BF3926BF91A500770307 /* BookmarkStorage.m in Sources */,
 				E61FC63326BE3B1600C8C8B4 /* AppDelegate.m in Sources */,
+				E674BF3626BF918700770307 /* Bookmark.m in Sources */,
+				E674BF3226BF881000770307 /* MasterSettingsViewController.m in Sources */,
+				E674BF2C26BF868D00770307 /* RootTabBarController.m in Sources */,
 				E61FC64426BE3B1900C8C8B4 /* main.m in Sources */,
-				E61FC64C26BE3C0A00C8C8B4 /* MainViewController.m in Sources */,
+				E61FC64C26BE3C0A00C8C8B4 /* MasterNoteViewController.m in Sources */,
+				E674BF2F26BF872C00770307 /* MasterBookmarkViewController.m in Sources */,
 				E61FC63626BE3B1600C8C8B4 /* SceneDelegate.m in Sources */,
 				E61FC65426BE515800C8C8B4 /* NoteEditorViewController.m in Sources */,
 				E61FC65726BE7D7F00C8C8B4 /* Settings.m in Sources */,
