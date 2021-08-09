@@ -186,7 +186,7 @@
     if (indexPath.section == SECTION_CONTENT) {
         if (indexPath.row == 0) {
             if (!self.createNew) {
-                self.contentTextView.text = self.document.noteName;
+                self.contentTextView.text = self.document.noteContent;
             }
         }
     }
