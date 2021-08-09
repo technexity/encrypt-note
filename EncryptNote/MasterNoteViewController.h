@@ -7,13 +7,16 @@
 
 #import <UIKit/UIKit.h>
 
-@class Note;
-
 NS_ASSUME_NONNULL_BEGIN
+
+@class NoteData;
+@class Entry;
+@class NoteEditorViewController;
 
 @interface MasterNoteViewController : UIViewController
 
-- (void)saveNote:(Note *)note;
+- (void)detailViewControllerDidClose:(NoteEditorViewController *)detailViewCtrl;
+- (void)deleteEntry:(Entry *)entry;
 
 @end
 

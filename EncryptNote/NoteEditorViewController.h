@@ -6,7 +6,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Note.h"
+#import "NoteDocument.h"
+#import "Entry.h"
 
 @class MasterNoteViewController;
 
@@ -14,9 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NoteEditorViewController : UIViewController
 
-@property (nonatomic, weak) MasterNoteViewController * viewController;
+@property (nonatomic, strong) NoteDocument * document;
+@property (nonatomic, strong) Entry * entry;
 
-@property (nonatomic, strong) Note * note;
+@property (nonatomic, assign) BOOL createNew;
+@property (nonatomic, weak) MasterNoteViewController * viewController;
 
 @end
 

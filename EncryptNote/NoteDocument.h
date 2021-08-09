@@ -7,13 +7,21 @@
 
 #import <UIKit/UIKit.h>
 
-@class Note;
-
 NS_ASSUME_NONNULL_BEGIN
+
+@class NoteMetadata;
+@class NoteData;
 
 @interface NoteDocument : UIDocument
 
-@property (nonatomic, strong) Note * note;
+@property (nonatomic, strong, readonly) NoteMetadata * noteMetadata;
+@property (nonatomic, strong, readonly) NoteData    * noteData;
+
+@property (nonatomic, strong) NSString            * noteName;
+@property (nonatomic, assign) BOOL                 requireUnlocked;
+@property (nonatomic, strong) NSString            * noteContent;
+
+@property (nonatomic, strong, readonly) NSString    * description;
 
 @end
 

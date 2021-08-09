@@ -13,7 +13,7 @@
 		E61FC64126BE3B1900C8C8B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E61FC63F26BE3B1900C8C8B4 /* LaunchScreen.storyboard */; };
 		E61FC64426BE3B1900C8C8B4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64326BE3B1900C8C8B4 /* main.m */; };
 		E61FC64C26BE3C0A00C8C8B4 /* MasterNoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64B26BE3C0A00C8C8B4 /* MasterNoteViewController.m */; };
-		E61FC64F26BE3ED300C8C8B4 /* Note.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64E26BE3ED300C8C8B4 /* Note.m */; };
+		E61FC64F26BE3ED300C8C8B4 /* NoteData.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC64E26BE3ED300C8C8B4 /* NoteData.m */; };
 		E61FC65126BE402E00C8C8B4 /* notes.json in Resources */ = {isa = PBXBuildFile; fileRef = E61FC65026BE402E00C8C8B4 /* notes.json */; };
 		E61FC65426BE515800C8C8B4 /* NoteEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */; };
 		E61FC65726BE7D7F00C8C8B4 /* Settings.m in Sources */ = {isa = PBXBuildFile; fileRef = E61FC65626BE7D7F00C8C8B4 /* Settings.m */; };
@@ -25,6 +25,8 @@
 		E674BF3626BF918700770307 /* Bookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3526BF918700770307 /* Bookmark.m */; };
 		E674BF3926BF91A500770307 /* BookmarkStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3826BF91A400770307 /* BookmarkStorage.m */; };
 		E674BF3C26BFE1A800770307 /* NoteDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = E674BF3B26BFE1A800770307 /* NoteDocument.m */; };
+		E6A9FCEC26C0BDAE00134513 /* NoteMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9FCEB26C0BDAE00134513 /* NoteMetadata.m */; };
+		E6A9FCF226C0E35200134513 /* Entry.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9FCF126C0E35200134513 /* Entry.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,8 +41,8 @@
 		E61FC64326BE3B1900C8C8B4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E61FC64A26BE3C0A00C8C8B4 /* MasterNoteViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MasterNoteViewController.h; sourceTree = "<group>"; };
 		E61FC64B26BE3C0A00C8C8B4 /* MasterNoteViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterNoteViewController.m; sourceTree = "<group>"; };
-		E61FC64D26BE3ED300C8C8B4 /* Note.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
-		E61FC64E26BE3ED300C8C8B4 /* Note.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Note.m; sourceTree = "<group>"; };
+		E61FC64D26BE3ED300C8C8B4 /* NoteData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoteData.h; sourceTree = "<group>"; };
+		E61FC64E26BE3ED300C8C8B4 /* NoteData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NoteData.m; sourceTree = "<group>"; };
 		E61FC65026BE402E00C8C8B4 /* notes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = notes.json; sourceTree = "<group>"; };
 		E61FC65226BE515800C8C8B4 /* NoteEditorViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoteEditorViewController.h; sourceTree = "<group>"; };
 		E61FC65326BE515800C8C8B4 /* NoteEditorViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NoteEditorViewController.m; sourceTree = "<group>"; };
@@ -62,6 +64,10 @@
 		E674BF3826BF91A400770307 /* BookmarkStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BookmarkStorage.m; sourceTree = "<group>"; };
 		E674BF3A26BFE1A800770307 /* NoteDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoteDocument.h; sourceTree = "<group>"; };
 		E674BF3B26BFE1A800770307 /* NoteDocument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NoteDocument.m; sourceTree = "<group>"; };
+		E6A9FCEA26C0BDAE00134513 /* NoteMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoteMetadata.h; sourceTree = "<group>"; };
+		E6A9FCEB26C0BDAE00134513 /* NoteMetadata.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NoteMetadata.m; sourceTree = "<group>"; };
+		E6A9FCF026C0E35200134513 /* Entry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Entry.h; sourceTree = "<group>"; };
+		E6A9FCF126C0E35200134513 /* Entry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Entry.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,23 +111,10 @@
 		E61FC65826BE8F9300C8C8B4 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				E6A9FCEF26C0BE1600134513 /* AppDelegate */,
+				E6A9FCED26C0BDE800134513 /* Data */,
+				E6A9FCEE26C0BDFD00134513 /* Settings */,
 				E674BF3326BF8CE300770307 /* UI */,
-				E61FC63126BE3B1600C8C8B4 /* AppDelegate.h */,
-				E61FC63226BE3B1600C8C8B4 /* AppDelegate.m */,
-				E61FC63426BE3B1600C8C8B4 /* SceneDelegate.h */,
-				E61FC63526BE3B1600C8C8B4 /* SceneDelegate.m */,
-				E61FC64D26BE3ED300C8C8B4 /* Note.h */,
-				E61FC64E26BE3ED300C8C8B4 /* Note.m */,
-				E61FC65526BE7D7F00C8C8B4 /* Settings.h */,
-				E61FC65626BE7D7F00C8C8B4 /* Settings.m */,
-				E674BEEC26BEAF4300770307 /* CloudKitDatabase.h */,
-				E674BEED26BEAF4300770307 /* CloudKitDatabase.m */,
-				E674BF3426BF918700770307 /* Bookmark.h */,
-				E674BF3526BF918700770307 /* Bookmark.m */,
-				E674BF3726BF91A400770307 /* BookmarkStorage.h */,
-				E674BF3826BF91A400770307 /* BookmarkStorage.m */,
-				E674BF3A26BFE1A800770307 /* NoteDocument.h */,
-				E674BF3B26BFE1A800770307 /* NoteDocument.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -162,6 +155,47 @@
 				E674BF3126BF881000770307 /* MasterSettingsViewController.m */,
 			);
 			name = UI;
+			sourceTree = "<group>";
+		};
+		E6A9FCED26C0BDE800134513 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				E6A9FCF026C0E35200134513 /* Entry.h */,
+				E6A9FCF126C0E35200134513 /* Entry.m */,
+				E6A9FCEA26C0BDAE00134513 /* NoteMetadata.h */,
+				E6A9FCEB26C0BDAE00134513 /* NoteMetadata.m */,
+				E61FC64D26BE3ED300C8C8B4 /* NoteData.h */,
+				E61FC64E26BE3ED300C8C8B4 /* NoteData.m */,
+				E674BF3A26BFE1A800770307 /* NoteDocument.h */,
+				E674BF3B26BFE1A800770307 /* NoteDocument.m */,
+				E674BEEC26BEAF4300770307 /* CloudKitDatabase.h */,
+				E674BEED26BEAF4300770307 /* CloudKitDatabase.m */,
+				E674BF3426BF918700770307 /* Bookmark.h */,
+				E674BF3526BF918700770307 /* Bookmark.m */,
+				E674BF3726BF91A400770307 /* BookmarkStorage.h */,
+				E674BF3826BF91A400770307 /* BookmarkStorage.m */,
+			);
+			name = Data;
+			sourceTree = "<group>";
+		};
+		E6A9FCEE26C0BDFD00134513 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E61FC65526BE7D7F00C8C8B4 /* Settings.h */,
+				E61FC65626BE7D7F00C8C8B4 /* Settings.m */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
+		E6A9FCEF26C0BE1600134513 /* AppDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				E61FC63126BE3B1600C8C8B4 /* AppDelegate.h */,
+				E61FC63226BE3B1600C8C8B4 /* AppDelegate.m */,
+				E61FC63426BE3B1600C8C8B4 /* SceneDelegate.h */,
+				E61FC63526BE3B1600C8C8B4 /* SceneDelegate.m */,
+			);
+			name = AppDelegate;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -234,9 +268,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E674BF3C26BFE1A800770307 /* NoteDocument.m in Sources */,
-				E61FC64F26BE3ED300C8C8B4 /* Note.m in Sources */,
+				E61FC64F26BE3ED300C8C8B4 /* NoteData.m in Sources */,
 				E674BEEE26BEAF4300770307 /* CloudKitDatabase.m in Sources */,
 				E674BF3926BF91A500770307 /* BookmarkStorage.m in Sources */,
+				E6A9FCF226C0E35200134513 /* Entry.m in Sources */,
 				E61FC63326BE3B1600C8C8B4 /* AppDelegate.m in Sources */,
 				E674BF3626BF918700770307 /* Bookmark.m in Sources */,
 				E674BF3226BF881000770307 /* MasterSettingsViewController.m in Sources */,
@@ -244,6 +279,7 @@
 				E61FC64426BE3B1900C8C8B4 /* main.m in Sources */,
 				E61FC64C26BE3C0A00C8C8B4 /* MasterNoteViewController.m in Sources */,
 				E674BF2F26BF872C00770307 /* MasterBookmarkViewController.m in Sources */,
+				E6A9FCEC26C0BDAE00134513 /* NoteMetadata.m in Sources */,
 				E61FC63626BE3B1600C8C8B4 /* SceneDelegate.m in Sources */,
 				E61FC65426BE515800C8C8B4 /* NoteEditorViewController.m in Sources */,
 				E61FC65726BE7D7F00C8C8B4 /* Settings.m in Sources */,

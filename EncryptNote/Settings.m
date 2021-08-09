@@ -37,6 +37,15 @@ NSString * const kBookmarksInAscOrder = @"BookmarksInAscOrder";
     return self;
 }
 
+- (NSURL *)documentsDirectoryURL {
+    NSURL* documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory
+                                                                          inDomain:NSUserDomainMask
+                                                                 appropriateForURL:nil
+                                                                            create:NO
+                                                                             error:nil];
+    return documentsDirectoryURL;
+}
+
 - (void)idAuthenicateWithCompletionHandler:(void (^)(BOOL success, NSString * errorMsg))completionHandler {
 
     LAContext *context = [[LAContext alloc] init];

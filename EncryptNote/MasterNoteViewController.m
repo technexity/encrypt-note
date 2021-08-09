@@ -7,18 +7,25 @@
 
 #import "MasterNoteViewController.h"
 #import "NoteEditorViewController.h"
-#import "Note.h"
+#import "AppDelegate.h"
 #import "Settings.h"
 #import "BookmarkStorage.h"
 #import "NoteDocument.h"
+#import "Entry.h"
+#import "NoteMetadata.h"
+
+#define NOTE_EXTENSION @"enf"
 
 @interface MasterNoteViewController () <UITableViewDataSource, UITableViewDelegate>
 
-@property (nonatomic, strong) NSMutableArray * notes;
+@property (nonatomic, strong) NSMutableArray * entries;
 @property (nonatomic, strong) UITableView * tableView;
 @property (nonatomic, strong) UISwitch   * bookmarkedSwitch;
 
 @property (nonatomic, strong) NSMetadataQuery * query;
+
+@property (strong) NoteDocument * selectedDocument;
+@property (strong) Entry * selectedEntry;
 
 @end
 
@@ -43,13 +50,14 @@
     
     [self.view addSubview:self.tableView];
     
-    [self loadNotes];
+    self.entries = [NSMutableArray array];
+    [self reload];
 }
 
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.notes count];
+    return [self.entries count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -79,12 +87,12 @@
     }
     
     // Fetch Note
-    NoteDocument *document = [self.notes objectAtIndex:indexPath.row];
+    Entry *entry = [self.entries objectAtIndex:indexPath.row];
     
     cell.selectionStyle = UITableViewCellSelectionStyleDefault;
-    cell.textLabel.text = document.note.noteName;
+    cell.textLabel.text = entry.metadata.noteName;
     
-    Bookmark *bookmark = [[BookmarkStorage sharedStorage] findBookmarkWithName:document.note.noteName];
+    Bookmark *bookmark = [[BookmarkStorage sharedStorage] findBookmarkWithName:entry.metadata.noteName];
     self.bookmarkedSwitch.on = bookmark != nil;
     
     // use switch tag to keep the table row number
@@ -101,13 +109,23 @@
         
         if (success) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                /// User authenticated successfully, take appropriate action
+                /// User authenticated successfully, take appropriate action\
                 
-                NoteDocument *document = [self.notes objectAtIndex:indexPath.row];
-                NoteEditorViewController *viewController = [[NoteEditorViewController alloc] init];
-                viewController.note = document.note;
-                viewController.viewController = self;
-                [self.navigationController pushViewController:viewController animated:YES];
+                self.selectedEntry = self.entries[indexPath.row];
+                self.selectedDocument = [[NoteDocument alloc] initWithFileURL:[self.selectedEntry fileURL]];
+
+                [self.selectedDocument openWithCompletionHandler:^(BOOL success) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        
+                        NoteEditorViewController *viewController = [[NoteEditorViewController alloc] init];
+                        viewController.document = self.selectedDocument;
+                        viewController.entry = self.selectedEntry;
+                        viewController.viewController = self;
+                        viewController.createNew = NO;
+                        [self.navigationController pushViewController:viewController animated:YES];
+                        
+                    });
+                }];
                 
             });
         }
@@ -130,12 +148,12 @@
     if ([sender isKindOfClass:[UISwitch class]]) {
         UISwitch *senderSwitch = (UISwitch *)sender;
         // use switch tag as index row number
-        NoteDocument *document = [self.notes objectAtIndex:senderSwitch.tag];
+        Entry *entry = [self.entries objectAtIndex:senderSwitch.tag];
         if ([senderSwitch isOn]) {
-            Bookmark *bookmark = [[Bookmark alloc] initWithBookmarkName:document.note.noteName noteUniqueKey:document.note.noteName requireUnlocked:document.note.requireUnlocked];
+            Bookmark *bookmark = [[Bookmark alloc] initWithBookmarkName:entry.metadata.noteName noteUniqueKey:entry.metadata.noteName requireUnlocked:entry.metadata.requireUnlocked];
             [[BookmarkStorage sharedStorage] saveBookmark:bookmark];
         } else {
-            [[BookmarkStorage sharedStorage] removeBookmarkWithName:document.note.noteName];
+            [[BookmarkStorage sharedStorage] removeBookmarkWithName:entry.metadata.noteName];
         }
     }
 }
@@ -143,93 +161,175 @@
 #pragma mark -
 
 - (void)addAction:(id)sender {
-    NoteEditorViewController *vc = [[NoteEditorViewController alloc] init];
-    vc.viewController = self;
+    NSURL *fileURL = [self getDocmentURL:[self getDocumentFilename:@"Note" forLocal:YES]];
+    NoteDocument *document = [[NoteDocument alloc] initWithFileURL:fileURL];
     
-    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-          
-    // Present View Controller Modally
-    [self presentViewController:nav animated:YES completion:nil];
+    [document saveToURL:[document fileURL] forSaveOperation:UIDocumentSaveForCreating completionHandler:^(BOOL success) {
+        if (!success) {
+            NSLog(@"There was an error saving the document - %@", fileURL);
+        }
+        NSLog(@"File created at %@", fileURL);
+        NoteMetadata *metadata = [document noteMetadata];
+        NSURL *fileURL = [document fileURL];
+        NSFileVersion *version = [NSFileVersion currentVersionOfItemAtURL:fileURL];
+        
+        self.selectedDocument = document;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self addOrUpdateEntryWithURL:fileURL metadata:metadata version:version];
+            
+            NoteEditorViewController *vc = [[NoteEditorViewController alloc] init];
+            vc.viewController = self;
+            vc.createNew = YES;
+            vc.document = document;
+            UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+            [self presentViewController:nav animated:YES completion:nil];
+            
+        });
+    }];
 }
 
 #pragma mark - private implementation
 
-- (void)loadNotes {
-    if (!self.notes) {
-        self.notes = [[NSMutableArray alloc] init];
-    }
-     
-    NSURL *baseURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
-     
-    if (baseURL) {
-        self.query = [[NSMetadataQuery alloc] init];
-        [self.query setSearchScopes:[NSArray arrayWithObject:NSMetadataQueryUbiquitousDocumentsScope]];
-         
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K like '*'", NSMetadataItemFSNameKey];
-        [self.query setPredicate:predicate];
-         
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver:self selector:@selector(queryDidFinish:) name:NSMetadataQueryDidFinishGatheringNotification object:self.query];
-        [nc addObserver:self selector:@selector(queryDidFinish:) name:NSMetadataQueryDidUpdateNotification object:self.query];
-         
-        [self.query startQuery];
-    }
+- (void)reload {
+    [self.entries removeAllObjects];
+    [self loadLocal];
 }
 
-- (void)queryDidFinish:(NSNotification *)notification {
-    NSMetadataQuery *query = [notification object];
-     
-    // Stop Updates
-    [query disableUpdates];
-     
-    // Stop Query
-    [query stopQuery];
-     
-    // Clear Bookmarks
-    [self.notes removeAllObjects];
-     
-    [query.results enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        NSURL *documentURL = [(NSMetadataItem *)obj valueForAttribute:NSMetadataItemURLKey];
-        NoteDocument *document = [[NoteDocument alloc] initWithFileURL:documentURL];
-         
-        [document openWithCompletionHandler:^(BOOL success) {
-            if (success) {
-                [self.notes addObject:document];
-                [self.tableView reloadData];
+- (void)loadLocal {
+    NSArray *localDocuments = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:[[Settings settings] documentsDirectoryURL]
+                                                            includingPropertiesForKeys:nil options:0 error:nil];
+        
+    [localDocuments enumerateObjectsUsingBlock:^(NSURL *fileURL, NSUInteger idx, BOOL *stop) {
+        if ([[fileURL pathExtension] isEqualToString:NOTE_EXTENSION]) {
+            [self loadDocumentAtFileURL:fileURL];
+        }
+    }];
+    
+    [self.navigationItem.rightBarButtonItem setEnabled:YES];
+}
+
+- (void)loadDocumentAtFileURL:(NSURL *)fileURL {
+    NoteDocument *document = [[NoteDocument alloc] initWithFileURL:fileURL];
+    
+    [document openWithCompletionHandler:^(BOOL success) {
+        if (!success) {
+            NSLog(@"Unable to open document at %@", fileURL);
+            return;
+        }
+
+        NoteMetadata *metadata = [document noteMetadata];
+        NSURL *fileURL = [document fileURL];
+        NSFileVersion *version = [NSFileVersion currentVersionOfItemAtURL:fileURL];
+        NSLog(@"Loaded file %@", [document fileURL]);
+        
+        [document closeWithCompletionHandler:^(BOOL success) {
+            if (!success) {
+                NSLog(@"There was an error closing the document at %@", fileURL);
             }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self addOrUpdateEntryWithURL:fileURL metadata:metadata version:version];
+            });
         }];
     }];
-     
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)addOrUpdateEntryWithURL:(NSURL *)fileURL metadata:(NoteMetadata *)metadata version:(NSFileVersion *)version {
+    NSInteger index = [self indexOfEntryWithFileURL:fileURL];
+    
+    if (index == NSNotFound) {
+        Entry *entry = [[Entry alloc] initWithFileURL:fileURL metadata:metadata version:version];
+        [self.entries addObject:entry];
+        
+        [self.entries sortUsingComparator:^NSComparisonResult(Entry *entry1, Entry *entry2) {
+            NSComparisonResult result = [[[entry1 metadata] noteName]  compare:[[entry2 metadata] noteName]];
+            NSLog(@"results is %ld", (long)result);
+            return result;
+        }];
+    } else {
+        Entry *entry = [self.entries objectAtIndex:index];
+        [entry setMetadata:metadata];
+        [entry setVersion:version];
+        
+        [self.entries sortUsingComparator:^NSComparisonResult(Entry *entry1, Entry *entry2) {
+            NSComparisonResult result = [[[entry1 metadata] noteName]  compare:[[entry2 metadata] noteName]];
+            NSLog(@"results is %ld", (long)result);
+            return result;
+        }];
+    }
+    
+    [self.tableView reloadData];
+}
+
+- (NSInteger)indexOfEntryWithFileURL:(NSURL *)fileURL {
+    __block NSInteger index = NSNotFound;
+    [self.entries enumerateObjectsUsingBlock:^(Entry *entry, NSUInteger idx, BOOL *stop) {
+        if ([[entry fileURL] isEqual:fileURL]) {
+            index = idx;
+            *stop = YES;
+        }
+    }];
+    return index;
+}
+
+- (void)deleteEntry:(Entry *)entry {
+    NSFileManager *fileManager = [[NSFileManager alloc] init];
+    [fileManager removeItemAtURL:[entry fileURL] error:nil];
+    [self removeEntryWithURL:[entry fileURL]];
+}
+
+- (void)removeEntryWithURL:(NSURL *)fileURL {
+    NSInteger index = [self indexOfEntryWithFileURL:fileURL];
+    [self.entries removeObjectAtIndex:index];
+    [self.tableView reloadData];
 }
 
 #pragma mark -
 
-- (void)saveNote:(Note *)note {
-    // Save Bookmark
-    NSURL *baseURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
-     
-    if (baseURL) {
-        NSURL *documentsURL = [baseURL URLByAppendingPathComponent:@"Documents"];
-        NSURL *documentURL = [documentsURL URLByAppendingPathComponent:[NSString stringWithFormat:@"Note_%@-%f", note.noteName, [[NSDate date] timeIntervalSince1970]]];
-         
-        NoteDocument *document = [[NoteDocument alloc] initWithFileURL:documentURL];
-        document.note = note;
-         
-        // Add Bookmark To Bookmarks
-        [self.notes addObject:document];
-         
-        // Reload Table View
-        [self.tableView reloadData];
-         
-        [document saveToURL:documentURL forSaveOperation:UIDocumentSaveForCreating completionHandler:^(BOOL success) {
-            if (success) {
-                NSLog(@"Save succeeded.");
-            } else {
-                NSLog(@"Save failed.");
-            }
-        }];
+- (NSURL *)getDocmentURL:(NSString *)filename {
+    return [[[Settings settings] documentsDirectoryURL] URLByAppendingPathComponent:filename isDirectory:NO];
+}
+
+- (NSString *)getDocumentFilename:(NSString *)filename forLocal:(BOOL)isLocal {
+    NSInteger docCount = 0;
+    NSString *newDocName = nil;
+    BOOL done = NO;
+    BOOL first = YES;
+    while (!done) {
+        if (first) {
+            first = NO;
+            newDocName = [NSString stringWithFormat:@"%@.%@", filename, NOTE_EXTENSION];
+        } else {
+            newDocName = [NSString stringWithFormat:@"%@_%ld.%@", filename, (long)docCount, NOTE_EXTENSION];
+        }
+        BOOL nameExists = NO;
+        if (isLocal) {
+            nameExists = [self documentNameExistsInObjects:newDocName];
+        }
+        if (!nameExists) {
+            break;
+        } else {
+            docCount++;
+        }
     }
+    return newDocName;
+}
+
+- (BOOL)documentNameExistsInObjects:(NSString *)documentName {
+    __block BOOL nameExists = NO;
+    [self.entries enumerateObjectsUsingBlock:^(Entry *entry, NSUInteger idx, BOOL *stop) {
+        if ([[[entry fileURL] lastPathComponent] isEqualToString:documentName]) {
+            nameExists = YES;
+            *stop = YES;
+        }
+    }];
+    return nameExists;
+}
+   
+- (void)detailViewControllerDidClose:(NoteEditorViewController *)detailViewCtrl {
+    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    NSFileVersion *version = [NSFileVersion currentVersionOfItemAtURL:[detailViewCtrl.document fileURL]];
+    [self addOrUpdateEntryWithURL:[detailViewCtrl.document fileURL] metadata:[detailViewCtrl.document noteMetadata] version:version];
 }
 
 @end

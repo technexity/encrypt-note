@@ -1,26 +1,25 @@
 //
-//  Note.m
+//  NoteMetadata.m
 //  EncryptNote
 //
-//  Created by Nam Tran on 07/08/2021.
+//  Created by Nam Tran on 09/08/2021.
 //
 
-#import "Note.h"
+#import "NoteMetadata.h"
 
-static NSString * const kNoteId             = @"noteId";
+#define NOTE_VERSION 1
+
+static NSString * const kNoteVersion        = @"noteVersion";
 static NSString * const kNoteName           = @"noteName";
-static NSString * const kNoteText           = @"noteText";
 static NSString * const kRequireUnlocked    = @"requireUnlocked";
 static NSString * const kCreatedDate        = @"createdDate";
 
-@implementation Note
+@implementation NoteMetadata
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.noteId = -1;
         self.noteName = @"";
-        self.noteText = @"";
         self.requireUnlocked = NO;
         self.createdDate = [NSDate date];
     }
@@ -30,9 +29,7 @@ static NSString * const kCreatedDate        = @"createdDate";
 - (instancetype)initWithNoteName:(NSString *)noteName {
     self = [super init];
     if (self) {
-        self.noteId = -1;
         self.noteName = noteName;
-        self.noteText = @"";
         self.requireUnlocked = NO;
         self.createdDate = [NSDate date];
     }
@@ -42,21 +39,7 @@ static NSString * const kCreatedDate        = @"createdDate";
 - (instancetype)initWithNoteName:(NSString *)noteName requireUnlocked:(BOOL)requireUnlocked {
     self = [super init];
     if (self) {
-        self.noteId = -1;
         self.noteName = noteName;
-        self.noteText = @"";
-        self.requireUnlocked = requireUnlocked;
-        self.createdDate = [NSDate date];
-    }
-    return self;
-}
-
-- (instancetype)initWithNoteName:(NSString *)noteName noteText:(NSString *)noteText requireUnlocked:(BOOL)requireUnlocked {
-    self = [super init];
-    if (self) {
-        self.noteId = -1;
-        self.noteName = noteName;
-        self.noteText = noteText;
         self.requireUnlocked = requireUnlocked;
         self.createdDate = [NSDate date];
     }
@@ -66,11 +49,12 @@ static NSString * const kCreatedDate        = @"createdDate";
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super init];
     if (self != nil) {
-        self.noteId = [aDecoder decodeIntegerForKey:kNoteId];
-        self.noteName =[aDecoder decodeObjectForKey:kNoteName];
-        self.noteText =[aDecoder decodeObjectForKey:kNoteText];
-        self.requireUnlocked = [aDecoder decodeBoolForKey:kRequireUnlocked];
-        self.createdDate =[aDecoder decodeObjectForKey:kCreatedDate];
+        NSInteger version = [aDecoder decodeIntegerForKey:kNoteVersion];
+        if (version == 1) {
+            self.noteName =[aDecoder decodeObjectForKey:kNoteName];
+            self.requireUnlocked = [aDecoder decodeBoolForKey:kRequireUnlocked];
+            self.createdDate =[aDecoder decodeObjectForKey:kCreatedDate];
+        }
     }
     return self;
 }
@@ -79,9 +63,8 @@ static NSString * const kCreatedDate        = @"createdDate";
 #pragma mark NSCoding & NSSecureCoding Protocols
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
-    [aCoder encodeInteger:self.noteId forKey:kNoteId];
+    [aCoder encodeInteger:NOTE_VERSION forKey:kNoteVersion];
     [aCoder encodeObject:self.noteName forKey:kNoteName];
-    [aCoder encodeObject:self.noteText forKey:kNoteText];
     [aCoder encodeBool:self.requireUnlocked forKey:kRequireUnlocked];
     [aCoder encodeObject:self.createdDate forKey:kCreatedDate];
 }

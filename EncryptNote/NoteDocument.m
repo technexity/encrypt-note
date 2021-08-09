@@ -6,92 +6,119 @@
 //
 
 #import "NoteDocument.h"
-#import "Note.h"
+#import "NoteMetadata.h"
+#import "NoteData.h"
+#import "Entry.h"
 
-#define NOTE_EXTENSION @"snf"
-#define kArchiveKey @"Note"
+static NSString * const kDataKey      = @"Data";
+static NSString * const kNoteMetadata = @"note.metadata";
+static NSString * const kNoteData     = @"note.data";
 
-@implementation NoteDocument {
-    //NSFileWrapper *_fileWrapper;
-}
+@interface NoteDocument ()
 
-/*#pragma mark - Document Writing Methods
+@property (nonatomic, strong) NSFileWrapper * fileWrapper;
+@property (nonatomic, strong) NoteMetadata  * noteMetadata;
+@property (nonatomic, strong) NoteData     * noteData;
 
-- (id)contentsForType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
-    //if (self.metadata == nil || self.data == nil)
-    //        return nil;
-    NSMutableDictionary *wrappers = [NSMutableDictionary dictionary];
-    [self encodeObject:self.note toWrappers:wrappers withKey:kArchiveKey];
-    //[self encodeObject:_metadata toWrappers:wrappers withKey:kMetadataKey];
-    NSFileWrapper *fileWrapper = [[NSFileWrapper alloc] initDirectoryWithFileWrappers:wrappers];
-    return fileWrapper;
-}
+@end
 
-- (void)encodeObject:(id<NSCoding>)object toWrappers:(NSMutableDictionary *)wrappers withKey:(NSString *)key {
-    @autoreleasepool {
-        NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initRequiringSecureCoding:YES];
-        [archiver encodeObject:object forKey:@"DATA"];
-        [archiver finishEncoding];
-        NSFileWrapper *wrapper = [[NSFileWrapper alloc] initRegularFileWithContents:archiver.encodedData];
-        [wrappers setObject:wrapper forKey:key];
-    }
-}
+@implementation NoteDocument
 
-#pragma mark - Document Reading Methods
+@dynamic noteName, noteContent, requireUnlocked;
 
-- (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
-    NSFileWrapper *fileWrapper = (NSFileWrapper *)contents;
-    self.note = [self decodeObjectFromWrapper:fileWrapper WithKey:kArchiveKey];
-    //self.note = nil;
-    //_metadata = nil;
-    return YES;
-}
+#pragma mark - Properties
 
-- (id)decodeObjectFromWrapper:(NSFileWrapper *)_fileWrapper WithKey:(NSString *)key {
-    NSFileWrapper *fileWrapper = [_fileWrapper.fileWrappers objectForKey:key];
-    if (!fileWrapper)
-        return nil;
-    NSData *data = [fileWrapper regularFileContents];
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:nil];
-    return [unarchiver decodeObjectForKey:@"DATA"];
-}*/
-
-- (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
-    if ([contents length] > 0) {
-        NSError *error;
-        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:contents error:&error];
-        if (error != NULL) {
-            NSLog(@"Error: %@", error.localizedDescription);
+- (NoteMetadata *)noteMetadata {
+    if (_noteMetadata == nil) {
+        if (self.fileWrapper != nil) {
+            _noteMetadata = [self decodeFromWrapperForKey:kNoteMetadata];
         } else {
-            unarchiver.requiresSecureCoding = NO;
-            self.note = [unarchiver decodeObjectForKey:kArchiveKey];
+            _noteMetadata = [[NoteMetadata alloc] init];
+            _noteMetadata.noteName = @"untitled";
         }
-        [unarchiver finishDecoding];
-    } else {
-        self.note = [[Note alloc] initWithNoteName:@"Finance"];
     }
+    return _noteMetadata;
+}
+
+- (NoteData *)noteData {
+    if (_noteData == nil) {
+        if (self.fileWrapper != nil) {
+            _noteData = [self decodeFromWrapperForKey:kNoteData];
+        } else {
+            _noteData = [[NoteData alloc] init];
+        }
+    }
+    return _noteData;
+}
+
+- (NSString *)noteName {
+    return self.noteMetadata.noteName;
+}
+
+- (void)setNoteName:(NSString *)noteName {
+    self.noteMetadata.noteName = noteName;
+    self.noteData.noteName = noteName;
+}
+
+- (NSString *)noteContent {
+    return self.noteData.noteContent;
+}
+
+- (void)setNoteContent:(NSString *)noteContent {
+    self.noteData.noteContent = noteContent;
+}
+
+- (BOOL)requireUnlocked {
+    return self.noteMetadata.requireUnlocked;
+}
+
+- (void)setRequireUnlocked:(BOOL)requireUnlocked {
+    self.noteMetadata.requireUnlocked = requireUnlocked;
+}
+
+- (NSString *)description {
+    return [[self.fileURL lastPathComponent] stringByDeletingPathExtension];
+}
+
+#pragma mark - Loading contents
+
+- (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
+    self.fileWrapper = (NSFileWrapper *)contents;
+    _noteMetadata = nil;
+    _noteData = nil;
     return YES;
 }
 
-- (id)contentsForType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
+- (id)decodeFromWrapperForKey:(NSString *)key {
+    NSFileWrapper *wrapper = [self.fileWrapper.fileWrappers objectForKey:key];
+    if (wrapper == nil) {
+        return nil;
+    }
+    NSData *data = [wrapper regularFileContents];
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:nil];
+    unarchiver.requiresSecureCoding = NO;
+    return [unarchiver decodeObjectForKey:kDataKey];
+}
+
+#pragma mark - Writting contents
+
+- (id)contentsForType:(NSString *)typeName error:(NSError *__autoreleasing  _Nullable *)outError {
+    if (self.noteMetadata == nil || self.noteData == nil) {
+        return nil;
+    }
+    NSDictionary *wrappers = @{
+        kNoteMetadata: [self encodeToWrapperWithObject:self.noteMetadata],
+        kNoteData: [self encodeToWrapperWithObject:self.noteData]
+    };
+    return [[NSFileWrapper alloc] initDirectoryWithFileWrappers:wrappers];
+}
+
+- (NSFileWrapper *)encodeToWrapperWithObject:(id<NSCoding>)object {
     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initRequiringSecureCoding:NO];
-    [archiver encodeObject:self.note forKey:kArchiveKey];
+    [archiver encodeObject:object forKey:kDataKey];
     [archiver finishEncoding];
-    return archiver.encodedData;
-}
-
-#pragma mark -
-#pragma mark Utililities
-
-- (NSData *)archivedDataWithArray:(Note *)note {
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:note requiringSecureCoding:YES error:nil];
-    return data;
-}
-
-- (Note *)unarchivedArrayFromData:(NSData *)data {
-    NSSet *set = [NSSet setWithArray:@[[Note class], [NSObject class]]];
-    Note *note = [NSKeyedUnarchiver unarchivedObjectOfClasses:set fromData:data error:nil];
-    return note;
+    NSFileWrapper *wrapper = [[NSFileWrapper alloc] initRegularFileWithContents:archiver.encodedData];
+    return wrapper;
 }
 
 @end

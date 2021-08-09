@@ -6,14 +6,15 @@
 //
 
 #import "NoteEditorViewController.h"
-#import "Note.h"
+#import "NoteData.h"
 #import "NoteDocument.h"
 #import "MasterNoteViewController.h"
 
-#define NUMBER_OF_SECTIONS 3
+#define NUMBER_OF_SECTIONS 4
 #define SECTION_NAME 0
 #define SECTION_CONTENT 1
 #define SECTION_LOCKED 2
+#define SECTION_DELETE 3
 
 #define NAME_CONTROL_TAG 100
 #define CONTENT_CONTROL_TAG 101
@@ -51,18 +52,33 @@
     self.navigationItem.leftBarButtonItem = cancelButton;
     self.navigationItem.rightBarButtonItem = doneButton;
     
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
-    [self.view addGestureRecognizer:tapRecognizer];
+    //UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
+    //[self.view addGestureRecognizer:tapRecognizer];
 }
 
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    if (self.createNew) {
+        return NUMBER_OF_SECTIONS - 1;
+    }
     return NUMBER_OF_SECTIONS;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10.f;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    return nil;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 1.f;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -150,12 +166,18 @@
                 cell.accessoryView = self.lockedSwitch;
             }
         }
+        
+        if (indexPath.section == SECTION_DELETE) {
+            cell.textLabel.font = [UIFont systemFontOfSize:24];
+            cell.textLabel.textColor = [UIColor redColor];
+            cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+        }
     }
     
     if (indexPath.section == SECTION_NAME) {
         if (indexPath.row == 0) {
-            if (self.note != nil) {
-                self.nameTextField.text = self.note.noteName;
+            if (!self.createNew) {
+                self.nameTextField.text = self.document.noteName;
             }
             [self.nameTextField becomeFirstResponder];
         }
@@ -163,23 +185,64 @@
     
     if (indexPath.section == SECTION_CONTENT) {
         if (indexPath.row == 0) {
-            if (self.note != nil) {
-                self.contentTextView.text = self.note.noteName;
+            if (!self.createNew) {
+                self.contentTextView.text = self.document.noteName;
             }
-            //[self.contentTextView becomeFirstResponder];
         }
     }
     
     if (indexPath.section == SECTION_LOCKED) {
         if (indexPath.row == 0) {
             cell.textLabel.text = NSLocalizedString(@"Locked", nil);
-            if (self.note != nil) {
-                self.lockedSwitch.on = self.note.requireUnlocked;
+            if (!self.createNew) {
+                self.lockedSwitch.on = self.document.requireUnlocked;
             }
         }
     }
     
+    if (indexPath.section == SECTION_DELETE) {
+        cell.textLabel.text = NSLocalizedString(@"Delete Note", nil);
+    }
+    
     return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == SECTION_DELETE) {
+#ifdef DEBUG
+    NSLog(@"%s", __PRETTY_FUNCTION__);
+#endif
+        [[self view] endEditing: YES];
+        
+        UIAlertController* actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil
+                                                                      preferredStyle:UIAlertControllerStyleActionSheet];
+
+        [actionSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction * action) {
+
+            // Cancel button tappped
+            [self dismissViewControllerAnimated:YES completion:nil];
+            
+        }]];
+
+        [actionSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Delete Note", nil)
+                                                        style:UIAlertActionStyleDestructive
+                                                      handler:^(UIAlertAction * action) {
+
+            // Delete button tapped
+            [self dismissViewControllerAnimated:YES completion:^{
+                
+                [self.viewController deleteEntry:self.entry];
+                [self.navigationController popViewControllerAnimated:YES];
+                
+            }];
+            
+        }]];
+        
+        [self presentViewController:actionSheet animated:YES completion:nil];
+        
+    }
 }
 
 #pragma mark - UITextFieldDelegate
@@ -213,7 +276,7 @@
 #pragma mark - Actions
 
 - (void)cancelAction:(id)sender {
-    if (self.note != nil) {
+    if (!self.createNew) {
         [self.navigationController popViewControllerAnimated:YES];
     } else {
         [self dismissViewControllerAnimated:YES completion:nil];
@@ -229,10 +292,22 @@
         
     }
     
-    Note *note = [[Note alloc] initWithNoteName:self.nameTextField.text noteText:self.contentTextView.text requireUnlocked:self.lockedSwitch.on];
-    [self.viewController saveNote:note];
+    self.document.noteName = self.nameTextField.text;
+    self.document.noteContent = self.contentTextView.text;
+    self.document.requireUnlocked = self.lockedSwitch.on;
     
-    if (self.note != nil) {
+    [self.document saveToURL:[self.document fileURL] forSaveOperation:UIDocumentSaveForOverwriting completionHandler:^(BOOL success) {
+        [self.document closeWithCompletionHandler:^(BOOL success) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (!success) {
+                    NSLog(@"Failed to close - %@", [self.document fileURL]);
+                }
+                [self.viewController detailViewControllerDidClose:self];
+            });
+        }];
+    }];
+    
+    if (!self.createNew) {
         [self.navigationController popViewControllerAnimated:YES];
     } else {
         [self dismissViewControllerAnimated:YES completion:nil];

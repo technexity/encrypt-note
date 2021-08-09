@@ -21,6 +21,8 @@ typedef void (^UIAlertCompletionBlock) (UIAlertController* alertController, NSIn
 
 + (Settings *)settings;
 
+- (NSURL *)documentsDirectoryURL;
+
 - (void)idAuthenicateWithCompletionHandler:(void (^)(BOOL success, NSString * errorMsg))completionHandler;
 
 - (UIAlertController *)showActionSheetIn:(UIViewController *)controller
