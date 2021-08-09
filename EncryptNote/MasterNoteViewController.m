@@ -27,6 +27,11 @@
 @property (strong) NoteDocument * selectedDocument;
 @property (strong) Entry * selectedEntry;
 
+@property (strong) NSMutableArray *iCloudURLs;
+@property BOOL iCloudIsReady;
+@property BOOL awaitingMoveLocalToiCloud;
+@property BOOL awaitingCopyiCloudToLocal;
+
 @end
 
 @implementation MasterNoteViewController
@@ -101,6 +106,25 @@
     return cell;
 }
 
+-(void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    
+    [self.query disableUpdates];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didBecomeActive:)
+                                                 name:UIApplicationDidBecomeActiveNotification object:nil];
+    [self.query enableUpdates];
+}
+
+- (void)didBecomeActive:(NSNotification *)notification {
+    [self reload];
+}
+
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -161,7 +185,7 @@
 #pragma mark -
 
 - (void)addAction:(id)sender {
-    NSURL *fileURL = [self getDocmentURL:[self getDocumentFilename:@"Note" forLocal:YES]];
+    NSURL *fileURL = [self getDocumentURL:[self getDocumentFilename:@"Note" forLocal:YES]];
     NoteDocument *document = [[NoteDocument alloc] initWithFileURL:fileURL];
     
     [document saveToURL:[document fileURL] forSaveOperation:UIDocumentSaveForCreating completionHandler:^(BOOL success) {
@@ -192,7 +216,14 @@
 
 - (void)reload {
     [self.entries removeAllObjects];
-    [self loadLocal];
+    
+    NSURL *baseURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
+         
+    if (baseURL) {
+        [self queryICloud];
+    } else {
+        [self loadLocal];
+    }
 }
 
 - (void)loadLocal {
@@ -285,7 +316,7 @@
 
 #pragma mark -
 
-- (NSURL *)getDocmentURL:(NSString *)filename {
+- (NSURL *)getDocumentURL:(NSString *)filename {
     return [[[Settings settings] documentsDirectoryURL] URLByAppendingPathComponent:filename isDirectory:NO];
 }
 
@@ -304,6 +335,8 @@
         BOOL nameExists = NO;
         if (isLocal) {
             nameExists = [self documentNameExistsInObjects:newDocName];
+        } else {
+            nameExists = [self documentNameExistsIniCloudURLs:newDocName];
         }
         if (!nameExists) {
             break;
@@ -330,6 +363,173 @@
     
     NSFileVersion *version = [NSFileVersion currentVersionOfItemAtURL:[detailViewCtrl.document fileURL]];
     [self addOrUpdateEntryWithURL:[detailViewCtrl.document fileURL] metadata:[detailViewCtrl.document noteMetadata] version:version];
+}
+
+#pragma mark -
+
+- (NSMetadataQuery *)documentQuery {
+    NSMetadataQuery *query = [[NSMetadataQuery alloc] init];
+    
+    if (query) {
+        [query setSearchScopes:@[NSMetadataQueryUbiquitousDocumentsScope]];
+        
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K LIKE %@", NSMetadataItemFSNameKey,
+                                  [NSString stringWithFormat:@"*.%@", NOTE_EXTENSION]];
+        
+        [query setPredicate:predicate];
+    }
+    
+    return query;
+}
+
+- (void)queryICloud {
+    [self stopICloudQuery];
+    
+    self.query = [self documentQuery];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processICloudFiles:)
+                                                 name:NSMetadataQueryDidFinishGatheringNotification object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processICloudFiles:)
+                                                 name:NSMetadataQueryDidUpdateNotification object:nil];
+    [self.query startQuery];
+}
+
+- (void)stopICloudQuery {
+    if (self.query) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSMetadataQueryDidFinishGatheringNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSMetadataQueryDidUpdateNotification object:nil];
+        [self.query stopQuery];
+        self.query = nil;
+    }
+}
+
+- (void)processICloudFiles:(NSNotification *)notification {
+    [self.query disableUpdates];
+    
+    [self.iCloudURLs removeAllObjects];
+    
+    [[self.query results] enumerateObjectsUsingBlock:^(NSMetadataItem *item,  NSUInteger idx, BOOL *stop) {
+        NSURL *fileURL = [item valueForAttribute:NSMetadataItemURLKey];
+        NSNumber *aBool = nil;
+        [fileURL getResourceValue:&aBool forKey:NSURLIsHiddenKey error:nil];
+        if (aBool && ![aBool boolValue]) {
+            [self.iCloudURLs addObject:fileURL];
+        }
+    }];
+    
+    NSLog(@"Found %lu files in iCloud", (unsigned long)[_iCloudURLs count]);
+    
+    self.iCloudIsReady = YES;
+    
+    if (YES) {
+        for (NSInteger i = [self.entries count] - 1; i >= 0; i--) {
+            Entry *entry = self.entries[i];
+            if (![self.iCloudURLs containsObject:[entry fileURL]]) {
+                [self removeEntryWithURL:[entry fileURL]];
+            }
+        }
+        
+        [self.iCloudURLs enumerateObjectsUsingBlock:^(NSURL *fileURL, NSUInteger idx, BOOL *stop) {
+            [self loadDocumentAtFileURL:fileURL];
+        }];
+        
+        [self.navigationItem.rightBarButtonItem setEnabled:YES];
+    }
+    
+    [self.query enableUpdates];
+    
+    self.awaitingMoveLocalToiCloud = YES;
+    if (self.awaitingMoveLocalToiCloud) {
+        self.awaitingMoveLocalToiCloud = NO;
+        
+        [self moveLocalToICloud];
+        
+    } else if (_awaitingCopyiCloudToLocal) {
+        
+        [self copyICloudToLocal];
+    }
+}
+
+- (void)moveLocalToICloud {
+    if (self.iCloudIsReady && !self.awaitingMoveLocalToiCloud) {
+        
+        NSArray *localDocuments = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:[[Settings settings] documentsDirectoryURL]
+                                                                includingPropertiesForKeys:nil options:0 error:nil];
+        
+        [localDocuments enumerateObjectsUsingBlock:^(NSURL *fileURL, NSUInteger idx, BOOL *stop) {
+            if ([[fileURL pathExtension] isEqualToString:NOTE_EXTENSION]) {
+                NSString *fileName = [[fileURL lastPathComponent] stringByDeletingPathExtension];
+                NSURL *destinationURL = [self getDocumentURL:[self getDocumentFilename:fileName forLocal:NO]];
+                
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    NSError *error = nil;
+                    BOOL success = [[NSFileManager defaultManager] setUbiquitous:YES
+                                                                       itemAtURL:fileURL
+                                                                  destinationURL:destinationURL
+                                                                           error:&error];
+                    if (success) {
+                        NSLog(@"Moved %@ to %@", fileURL,destinationURL);
+                        [self loadDocumentAtFileURL:destinationURL];
+                    } else {
+                        NSLog(@"Error Moving %@ to %@ - %@", fileURL,destinationURL, error.localizedDescription);
+                    }
+                });
+            }
+        }];
+        
+        [self copyICloudToLocal];
+    } else {
+        self.awaitingMoveLocalToiCloud = YES;
+    }
+}
+
+- (void)copyICloudToLocal {
+    if (self.iCloudIsReady && self.awaitingCopyiCloudToLocal) {
+        self.awaitingCopyiCloudToLocal = NO;
+        
+        [self.iCloudURLs enumerateObjectsUsingBlock:^(NSURL *fileURL, NSUInteger idx, BOOL *stop) {
+            NSString *fileName = [[fileURL lastPathComponent] stringByDeletingPathExtension];
+            NSURL *destinationURL = [self getDocumentURL:[self getDocumentFilename:fileName forLocal:YES]];
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                
+                NSFileCoordinator *fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+                [fileCoordinator coordinateReadingItemAtURL:fileURL
+                                                    options:NSFileCoordinatorReadingWithoutChanges error:nil
+                                                 byAccessor:^(NSURL *newURL) {
+                    
+                    NSFileManager *fileManager = [[NSFileManager alloc] init];
+                    NSError *error = nil;
+                    BOOL success = [fileManager copyItemAtURL:fileURL toURL:destinationURL error:&error];
+                    if (success) {
+                        NSLog(@"Copied %@ to %@",fileURL,destinationURL);
+                        [self loadDocumentAtFileURL:destinationURL];
+                    } else {
+                        NSLog(@"Error Copying %@ to %@ - %@", fileURL, destinationURL, error.localizedDescription);
+                    }
+                    
+                }];
+                
+            });
+            
+        }];
+    } else {
+        if (!self.awaitingCopyiCloudToLocal) {
+            self.awaitingCopyiCloudToLocal = YES;
+        }
+    }
+}
+
+- (BOOL)documentNameExistsIniCloudURLs:(NSString *)documentName {
+    __block BOOL nameExists = NO;
+    [_iCloudURLs enumerateObjectsUsingBlock:^(NSURL *fileURL, NSUInteger idx, BOOL *stop) {
+        if ([[fileURL lastPathComponent] isEqualToString:documentName]) {
+            nameExists = YES;
+            *stop = YES;
+        }
+    }];
+    return nameExists;
 }
 
 @end

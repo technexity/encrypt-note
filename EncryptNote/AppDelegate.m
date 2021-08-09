@@ -9,6 +9,8 @@
 
 @interface AppDelegate ()
 
+@property (strong) NSURL * iCloudURL;
+
 @end
 
 @implementation AppDelegate
@@ -36,5 +38,29 @@
     // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
 }
 
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    [self initializeiCloudAccessWithCompletionHandler:^(BOOL isAvailable) {
+        self.iCloudIsAvailable = isAvailable;
+    }];
+}
+
+#pragma mark -
+
+- (void)initializeiCloudAccessWithCompletionHandler:(void(^)(BOOL isAvailable)) completion {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        self.iCloudURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
+        if (self.iCloudURL != nil) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"iCloud is available - %@", self.iCloudURL);
+                completion(YES);
+            });
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"iCloud is not available");
+                completion(NO);
+            });
+        }
+    });
+}
 
 @end
