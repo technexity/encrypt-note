@@ -9,6 +9,8 @@
 #import "NoteData.h"
 #import "NoteDocument.h"
 #import "MasterNoteViewController.h"
+#import "NSString+AESCrypt.h"
+#import "Settings.h"
 
 #define NUMBER_OF_SECTIONS 4
 #define SECTION_NAME 0
@@ -186,7 +188,7 @@
     if (indexPath.section == SECTION_CONTENT) {
         if (indexPath.row == 0) {
             if (!self.createNew) {
-                self.contentTextView.text = self.document.noteName;
+                self.contentTextView.text = [self decryptedTextFromNoteText:self.document.noteContent];
             }
         }
     }
@@ -293,7 +295,7 @@
     }
     
     self.document.noteName = self.nameTextField.text;
-    self.document.noteContent = self.contentTextView.text;
+    self.document.noteContent = [self encryptedTextFromNoteText:self.contentTextView.text];
     self.document.requireUnlocked = self.lockedSwitch.on;
     
     [self.document saveToURL:[self.document fileURL] forSaveOperation:UIDocumentSaveForOverwriting completionHandler:^(BOOL success) {
@@ -322,6 +324,24 @@
             NSLog(@"On/off: %@", [senderSwitch isOn] ? @"YES" : @"NO");
         }
     }
+}
+
+- (NSString *)encryptedTextFromNoteText:(NSString *)noteText {
+    NSString *encryptedText = [noteText AES256EncryptWithKey:[[Settings settings] getSecKeyString]];
+    if (encryptedText == nil) {
+        //encryptedText = noteText;
+        NSLog(@"Unable to encrypt note text!");
+    }
+    return encryptedText;
+}
+
+- (NSString *)decryptedTextFromNoteText:(NSString *)noteText {
+    NSString *decryptedText = [noteText AES256DecryptWithKey:[[Settings settings] getSecKeyString]];
+    if (decryptedText == nil) {
+        //decryptedText = noteText;
+        NSLog(@"Unable to decrypt note text!");
+    }
+    return decryptedText;
 }
 
 @end

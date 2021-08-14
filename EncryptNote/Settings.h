@@ -25,6 +25,8 @@ typedef void (^UIAlertCompletionBlock) (UIAlertController* alertController, NSIn
 
 - (void)idAuthenicateWithCompletionHandler:(void (^)(BOOL success, NSString * errorMsg))completionHandler;
 
+- (NSString *)getSecKeyString;
+
 - (UIAlertController *)showActionSheetIn:(UIViewController *)controller
                                    title:(NSString *)title
                        cancelButtonTitle:(NSString *)cancelButtonTitle
