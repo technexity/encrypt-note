@@ -36,6 +36,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    // register for keyboard notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
     self.tableView.autoresizesSubviews = YES;
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -56,6 +60,14 @@
     
     //UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
     //[self.view addGestureRecognizer:tapRecognizer];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
+    // unregister for keyboard notifications while not visible.
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
 }
 
 #pragma mark - UITableViewDataSource
@@ -85,9 +97,16 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == SECTION_CONTENT) {
-        return 240.f;
+        return UITableViewAutomaticDimension;
     }
-    return 49.f;//UITableViewAutomaticDimension;
+    return 54.f;//UITableViewAutomaticDimension;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == SECTION_CONTENT) {
+        return 640;//UITableViewAutomaticDimension;
+    }
+    return 54.f;//UITableViewAutomaticDimension;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -112,6 +131,7 @@
                 self.nameTextField.textAlignment = NSTextAlignmentLeft;
                 self.nameTextField.font = [UIFont systemFontOfSize:20];
                 self.nameTextField.tag = NAME_CONTROL_TAG;
+                self.nameTextField.placeholder = NSLocalizedString(@"Name", nil);
 
                 self.nameTextField.keyboardType = UIKeyboardTypeAlphabet; // keyboard type of ur choice
                 self.nameTextField.returnKeyType = UIReturnKeyDefault; // returnKey type for keyboard
@@ -138,6 +158,7 @@
             self.contentTextView.textAlignment = NSTextAlignmentLeft;
             self.contentTextView.font = [UIFont systemFontOfSize:20];
             self.contentTextView.tag = CONTENT_CONTROL_TAG;
+            self.contentTextView.scrollEnabled = NO;
             
             self.contentTextView.keyboardType = UIKeyboardTypeAlphabet; // keyboard type of ur choice
             self.contentTextView.returnKeyType = UIReturnKeyDone; // returnKey type for keyboard
@@ -261,12 +282,56 @@
 #pragma mark - UITextViewDelegate
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-    //[textView becomeFirstResponder];
+    [textView becomeFirstResponder];
+    // scroll to cursor
+    [self scrollToCursorForTextView:textView];
 }
 
 - (BOOL)textViewShouldEndEditing:(UITextView *)textView {
     [textView resignFirstResponder];
     return YES;
+}
+
+- (void)textViewDidChange:(UITextView *)textView {
+    [self.tableView beginUpdates]; // This will cause an animated update of
+    [self.tableView endUpdates];   // the height of your UITableViewCell
+    [self scrollToCursorForTextView:textView]; // OPTIONAL: Follow cursor
+}
+
+- (void)scrollToCursorForTextView: (UITextView *)textView {
+    CGRect cursorRect = [textView caretRectForPosition:textView.selectedTextRange.start];
+    cursorRect = [self.tableView convertRect:cursorRect fromView:textView];
+    if (![self rectVisible:cursorRect]) {
+        cursorRect.size.height += 8; // To add some space underneath the cursor
+        [self.tableView scrollRectToVisible:cursorRect animated:YES];
+    }
+}
+
+- (BOOL)rectVisible: (CGRect)rect {
+    CGRect visibleRect;
+    visibleRect.origin = self.tableView.contentOffset;
+    visibleRect.origin.y += self.tableView.contentInset.top;
+    visibleRect.size = self.tableView.bounds.size;
+    visibleRect.size.height -= self.tableView.contentInset.top + self.tableView.contentInset.bottom;
+    return CGRectContainsRect(visibleRect, rect);
+}
+
+#pragma mark - Keyboard
+
+- (void)keyboardWillShow:(NSNotification*)aNotification {
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(self.tableView.contentInset.top, 0.0, kbSize.height, 0.0);
+    self.tableView.contentInset = contentInsets;
+    self.tableView.scrollIndicatorInsets = contentInsets;
+}
+
+- (void)keyboardWillHide:(NSNotification*)aNotification {
+    [UIView animateWithDuration:0.35 animations:^{
+        UIEdgeInsets contentInsets = UIEdgeInsetsMake(self.tableView.contentInset.top, 0.0, 0.0, 0.0);
+        self.tableView.contentInset = contentInsets;
+        self.tableView.scrollIndicatorInsets = contentInsets;
+    }];
 }
 
 #pragma mark -
